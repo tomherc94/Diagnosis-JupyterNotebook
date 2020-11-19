@@ -1,0 +1,148 @@
+# Importação de Bibliotecas
+import pandas as pd
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import classification_report,confusion_matrix
+
+# Leitura de Dados no formato .CSV
+cars = pd.read_csv('cars.csv',sep=';',names=["buying","buying2","buying3","buying4","maint","maint2","maint3","maint4","doors","doors2","doors3","doors4","persons","persons2","persons3","lugboot","lugboot2","lugboot3","safety","safety2","safety3","evaluation","evaluation2","evaluation3","evaluation4"])
+cars.head() # primeiros 5 registros
+
+# convertendo dados para string (uso em concatenação)
+cars = cars.applymap(str)
+cars.head()
+
+# juntando os 4 campos de "buing" em um único!
+new2 = cars["buying2"].copy()
+new3 = cars["buying3"].copy()
+new4 = cars["buying4"].copy()
+cars["buying"]=cars["buying"].str.cat(new2,sep ="")
+cars["buying"]=cars["buying"].str.cat(new3,sep ="")
+cars["buying"]=cars["buying"].str.cat(new4,sep ="")
+cars.head()
+
+# Eliminando campos desnecessarios..
+cars2 = cars.drop(['buying2','buying3','buying4'], axis=1)
+cars2.head()
+
+# juntando os 4 campos de maint em um único!
+new2 = cars2["maint2"].copy()
+new3 = cars2["maint3"].copy()
+new4 = cars2["maint4"].copy()
+cars2["maint"]=cars2["maint"].str.cat(new2,sep ="")
+cars2["maint"]=cars2["maint"].str.cat(new3,sep ="")
+cars2["maint"]=cars2["maint"].str.cat(new4,sep ="")
+cars2.head()
+
+# Eliminando campos desnecessarios..
+cars3 = cars2.drop(['maint2','maint3','maint4'], axis=1)
+cars3.head()
+
+# juntando os 4 campos de doors em um único!
+new2 = cars3["doors2"].copy()
+new3 = cars3["doors3"].copy()
+new4 = cars3["doors4"].copy()
+cars3["doors"]=cars3["doors"].str.cat(new2,sep ="")
+cars3["doors"]=cars3["doors"].str.cat(new3,sep ="")
+cars3["doors"]=cars3["doors"].str.cat(new4,sep ="")
+cars3.head()
+
+# Eliminando campos desnecessarios..
+cars4 = cars3.drop(['doors2','doors3','doors4'], axis=1)
+cars4.head()
+
+# juntando os 3 campos de persons em um único!
+new2 = cars4["persons2"].copy()
+new3 = cars4["persons3"].copy()
+cars4["persons"]=cars4["persons"].str.cat(new2,sep ="")
+cars4["persons"]=cars4["persons"].str.cat(new3,sep ="")
+cars4.head()
+
+# Eliminando campos desnecessarios..
+cars5 = cars4.drop(['persons2','persons3'], axis=1)
+cars5.head()
+
+# juntando os 3 campos de lugboot em um único!
+new2 = cars5["lugboot2"].copy()
+new3 = cars5["lugboot3"].copy()
+cars5["lugboot"]=cars5["lugboot"].str.cat(new2,sep ="")
+cars5["lugboot"]=cars5["lugboot"].str.cat(new3,sep ="")
+cars5.head()
+
+# Eliminando campos desnecessarios..
+cars6 = cars5.drop(['lugboot2','lugboot3'], axis=1)
+cars6.head()
+
+# juntando os 3 campos de safety em um único!
+new2 = cars6["safety2"].copy()
+new3 = cars6["safety3"].copy()
+cars6["safety"]=cars6["safety"].str.cat(new2,sep ="")
+cars6["safety"]=cars6["safety"].str.cat(new3,sep ="")
+cars6.head()
+
+# Eliminando campos desnecessarios..
+cars7 = cars6.drop(['safety2','safety3'], axis=1)
+cars7.head()
+
+# juntando os 4 campos de evaluation em um único!
+new2 = cars7["evaluation2"].copy()
+new3 = cars7["evaluation3"].copy()
+new4 = cars7["evaluation4"].copy()
+cars7["evaluation"]=cars7["evaluation"].str.cat(new2,sep ="")
+cars7["evaluation"]=cars7["evaluation"].str.cat(new3,sep ="")
+cars7["evaluation"]=cars7["evaluation"].str.cat(new4,sep ="")
+cars7.head()
+
+# Eliminando campos desnecessarios..
+cars8 = cars7.drop(['evaluation2','evaluation3','evaluation4'], axis=1)
+cars8.head()
+
+# Estrutura:
+# Preçocompra (buying), Custo Manut. (maint), Núm.Portas (doors), Núm.Pessoas (persons), Porta Malas (lug_boot), 
+# Segurança (safety) e Avaliação (evaluation)
+
+
+# Dimensões do dataset (quantidade de linhas, quantidade de coluhas)
+cars8.shape
+
+# Convertendo todos os dados para Float (RNA precisa de dados float)
+cars9 = cars8.astype(float)
+cars9
+
+# Agora, vamos definir quais são os atributos features (X) e o atribut target (Y)
+X = cars9.drop('evaluation',axis=1)
+y = cars9['evaluation']
+
+# Vamos separar (split) nossos dados em conj. de dados para treinamento e testes..
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+# Observe que temos 1296 registros para Treinamento (2/3 ou 66,7% => padrão do train_test, split)
+X_train.shape
+
+# Observe que temos 432 registros para Testes (1/3 ou 33.3% => padrão do train_test, split)
+X_test.shape
+
+# Criação do modelo de Regressão linear
+mlp = MLPClassifier(hidden_layer_sizes=(7,7,7),max_iter=500)
+mlp
+
+# Treino do modelo com os Dados
+mlp.fit(X_train,y_train)
+
+# Determinando a Acurácia do Modelo
+predictions = mlp.predict(X_test)
+print(confusion_matrix(y_test,predictions))
+
+# Criando Dataframe para teste
+
+# Caso 1: 0001 (Buying=Low), 0001 (Maintenance=Low), 1000 (Doors=5 or more), 100 (Persons=5 or more), 100 (Lugboot=Big), 100 (Safety=Alta)
+data = [[1,1,1000,100,100,100]]
+df = pd.DataFrame(data, columns = ['buying','maint','doors','persons','lugboot','safety']) 
+df
+
+# Aplicando a predição!
+predictions = mlp.predict(df)
+predictions
+
+# Para o Caso 1, a RNA avaliou e indicou a resposta (evaluation) '1000' que significa 'Inacessível' ou 'Não compre o carro'
+Out: array([1000.])
